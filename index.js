@@ -12,8 +12,8 @@ const multer = require('multer');
 const session = require('express-session');
 const fs = require('fs');
 const app = express();
-const PORT = 222;
-const MONGO_URI = 'mongodb://localhost:27017/docmanager'; // Replace with your MongoDB URI
+const PORT = process.env.PORT || 222;
+const MONGO_URI = process.env.MONGO_URI;
 
 // Middleware
 app.use(cors());
