@@ -23,8 +23,49 @@ app.use(express.static(path.join(__dirname, 'public'))); // Serve static files f
 
 // MongoDB connection
 mongoose.connect(MONGO_URI)
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connection error:', err));
+.then(async () => {
+
+    console.log("MongoDB connected");
+
+    try {
+
+        const adminExists = await User.findOne({ username: "admin" });
+
+        if (!adminExists) {
+
+            console.log("Creating default admin...");
+
+            let dept = await Department.findOne({ name: "Administration" });
+
+            if (!dept) {
+
+                dept = await Department.create({
+                    name: "Administration"
+                });
+
+                console.log("Administration department created.");
+            }
+
+            const hashedPassword = await bcrypt.hash("Admin@123", 10);
+
+            await User.create({
+                username: "admin",
+                password: hashedPassword,
+                department: dept._id,
+                role: "admin"
+            });
+
+            console.log("✅ Default admin created.");
+        }
+
+    } catch (err) {
+
+        console.error("Bootstrap Error:", err);
+
+    }
+
+})
+.catch(err => console.error("MongoDB connection error:", err));
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
