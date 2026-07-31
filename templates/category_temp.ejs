@@ -1,0 +1,173 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-body">
+          <h2 class="card-title text-center mb-4" style="color: #1a819c; font-weight: 600">Add New Category</h2>
+
+          <% if (locals.error) { %>
+          <div class="alert alert-danger" role="alert"><%= error %></div>
+          <% } %> <% if (locals.success) { %>
+          <div class="alert alert-success" role="alert"><%= success %></div>
+          <% } %>
+
+          <form id="addCategoryForm" class="needs-validation" novalidate>
+            <div class="mb-3">
+              <label for="name" class="form-label" style="color: #1a819c; font-weight: 600">Category Name</label>
+              <input type="text" class="form-control" id="name" name="name" required minlength="2" maxlength="50" />
+              <div class="invalid-feedback">Please enter a valid category name (2-50 characters)</div>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary" style="background-color: #1a819c; color: #fff; font-weight: 600">Add Category</button>
+              <a href="/dashboard" class="btn btn-secondary"> Cancel </a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Categories List -->
+      <div class="card mt-4 shadow">
+        <div class="card-body">
+          <h3 class="card-title h5 mb-3" style="color: #1a819c; font-weight: 600">Existing Categories</h3>
+          <div id="categoriesList" class="list-group">
+            <!-- Categories will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("addCategoryForm");
+    const categoriesList = document.getElementById("categoriesList");
+
+    // Load existing categories
+    loadCategories();
+
+    // Form submission
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      if (!form.checkValidity()) {
+        e.stopPropagation();
+        form.classList.add("was-validated");
+        return;
+      }
+
+      const name = document.getElementById("name").value;
+
+      try {
+        const response = await fetch("/categories", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Show success message
+          const alert = document.createElement("div");
+          alert.className = "alert alert-success";
+          alert.textContent = "Category added successfully";
+          form.insertBefore(alert, form.firstChild);
+
+          // Reset form
+          form.reset();
+          form.classList.remove("was-validated");
+
+          // Reload categories list
+          loadCategories();
+
+          // Remove success message after 3 seconds
+          setTimeout(() => alert.remove(), 3000);
+        } else {
+          throw new Error(data.error || "Error adding category");
+        }
+      } catch (error) {
+        const alert = document.createElement("div");
+        alert.className = "alert alert-danger";
+        alert.textContent = error.message;
+        form.insertBefore(alert, form.firstChild);
+      }
+    });
+
+    // Load categories function
+    async function loadCategories() {
+      try {
+        const response = await fetch("/categories");
+        const categories = await response.json();
+
+        categoriesList.innerHTML = categories.length
+          ? categories
+              .map(
+                (category) => `
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              ${category.name}
+              <div>
+                <span class="badge text-dark bg-warning rounded-pill me-2">
+                  ${new Date(category.createdAt).toLocaleDateString()}
+                </span>
+                <button 
+                  class="btn btn-sm btn-outline-danger"
+                  onclick="deleteCategory('${category._id}', '${category.name}')"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          `
+              )
+              .join("")
+          : '<div class="list-group-item text-muted">No categories found</div>';
+      } catch (error) {
+        categoriesList.innerHTML = `
+          <div class="alert alert-danger mb-0">
+            Error loading categories
+          </div>
+        `;
+      }
+    }
+
+    // Add delete category function
+    window.deleteCategory = async function (categoryId, categoryName) {
+      if (!confirm(`Are you sure you want to delete category "${categoryName}"?`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/categories/${categoryId}`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || "Error deleting category");
+        }
+
+        // Reload the categories list
+        await loadCategories();
+
+        // Show success message
+        const alert = document.createElement("div");
+        alert.className = "alert alert-success alert-dismissible fade show mt-3";
+        alert.innerHTML = `
+            Category "${categoryName}" has been deleted successfully
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          `;
+        categoriesList.parentNode.insertBefore(alert, categoriesList);
+
+        // Remove the alert after 3 seconds
+        setTimeout(() => alert.remove(), 3000);
+      } catch (error) {
+        console.error("Error:", error);
+        alert(error.message);
+      }
+    };
+  });
+</script>

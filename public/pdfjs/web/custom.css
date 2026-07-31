@@ -1,0 +1,29 @@
+#download,
+#print,
+#secondaryPrint,
+#secondaryDownload,
+#secondaryToolbarButtonContainer button[id^="second"][id$="Print"],
+#secondaryToolbarButtonContainer button[id^="second"][id$="Download"],
+#toolbarViewerRight button[id^="print"],
+#toolbarViewerRight button[id^="download"],
+.hiddenMediumView,
+#viewBookmark {
+    display: none !important;
+}
+
+#toolbarContainer {
+    pointer-events: none;
+}
+
+#toolbarViewer {
+    pointer-events: auto;
+}
+
+#viewerContainer {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}

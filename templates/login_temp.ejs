@@ -1,0 +1,31 @@
+<div class="container mt-5 align-items-center justify-content-center d-flex">
+  <div class="row justify-content-center">
+    <div class="col-md-5" style="width: 400px; border-radius: 15px">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title text-center mb-4" style="color: #1a819c; font-weight: 600">Login</h2>
+          <form action="/login" method="POST" class="mb-4">
+            <div class="mb-3">
+              <label for="username" class="form-label" style="color: #1a819c; font-weight: 600">Username:</label>
+              <input type="text" class="form-control" id="username" name="username" required />
+              <div class="invalid-feedback">Please enter your username</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="password" class="form-label" style="color: #1a819c; font-weight: 600">Password:</label>
+              <input type="password" class="form-control" id="password" name="password" required />
+              <div class="invalid-feedback">Please enter your password</div>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary" style="background-color: #1a819c; color: #fff; font-weight: 600">Login</button>
+            </div>
+          </form>
+          <!-- <div class="text-center mt-3">
+            <p>Don't have an account? <a href="/register">Register here</a></p>
+          </div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
