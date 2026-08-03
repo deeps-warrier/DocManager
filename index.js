@@ -462,7 +462,46 @@ app.delete('/documents/:id', async (req, res) => {
 
 });
 
+app.get('/dashboard', isLoggedIn, async (req, res) => {
 
+    try {
+
+        let documents;
+
+        if (req.session.user.role === "admin") {
+
+            documents = await Doc.find()
+                .populate("department")
+                .populate("category")
+                .populate("uploadedBy")
+                .sort({ "files.0.filename": 1 });
+
+        } else {
+
+            documents = await Doc.find({
+                department: req.user.department
+            })
+            .populate("department")
+            .populate("category")
+            .populate("uploadedBy")
+            .sort({ "files.0.filename": 1 });
+
+        }
+
+        res.render("dashboard", {
+            user: req.user,
+            documents
+        });
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).send("Dashboard Error");
+
+    }
+
+});
 
 app.get('/add_department', isAdmin, async (req, res) => {
     try {
