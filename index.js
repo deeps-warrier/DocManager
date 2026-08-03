@@ -8,12 +8,13 @@ const Department = require('./models/Department');
 const Category = require('./models/Category');
 const Doc = require('./models/Docs');
 const bcrypt = require('bcryptjs');
-const multer = require('multer');
 const session = require('express-session');
 const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 222;
 const MONGO_URI = process.env.MONGO_URI;
+const cloudinary = require('./cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 // Middleware
 app.use(cors());
@@ -68,13 +69,15 @@ mongoose.connect(MONGO_URI)
 .catch(err => console.error("MongoDB connection error:", err));
 
 // Multer setup for file uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'public/uploads/');
-    },
-    filename: (req, file, cb) => {
-        
-        cb(null,file.originalname);
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "DocManager",
+        resource_type: "raw",
+        allowed_formats: ["pdf"],
+        public_id: (req, file) => {
+            return Date.now() + "-" + file.originalname.replace(".pdf", "");
+        }
     }
 });
 
@@ -313,6 +316,8 @@ app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) =
                     originalname: file.originalname,
                     filename: file.filename,
                     path: file.path,
+                    cloudinaryUrl: file.path,
+                    publicId: file.filename,
                     uploadDate: new Date()
                 }],
                 uploadedBy: req.user._id
