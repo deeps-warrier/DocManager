@@ -13,6 +13,7 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 222;
 const MONGO_URI = process.env.MONGO_URI;
+const multer = require('multer');
 const cloudinary = require('./cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
