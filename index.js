@@ -312,7 +312,7 @@ app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) =
                 category: category,
                 files: [{
                     originalname: file.originalname,
-                    filename: file.originalname,
+                    filename: file.filename,
                     path: file.path,
                     cloudinaryUrl: file.path,
                     publicId: file.filename || file.public_id,
