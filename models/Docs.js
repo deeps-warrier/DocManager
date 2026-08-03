@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const docSchema = new mongoose.Schema({
-
     department: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Department',
@@ -15,22 +14,15 @@ const docSchema = new mongoose.Schema({
     },
 
     files: [{
-
         originalname: String,
-
         filename: String,
-
         path: String,
-
         cloudinaryUrl: String,
-
         publicId: String,
-
         uploadDate: {
             type: Date,
             default: Date.now
         }
-
     }],
 
     uploadedBy: {
@@ -39,6 +31,8 @@ const docSchema = new mongoose.Schema({
         required: true
     }
 
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model('Doc', docSchema);
