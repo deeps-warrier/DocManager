@@ -71,17 +71,14 @@ mongoose.connect(MONGO_URI)
 
 // Multer setup for file uploads
 const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
+    cloudinary,
+    params: async (req, file) => ({
         folder: "DocManager",
         resource_type: "raw",
-        allowed_formats: ["pdf"],
-        public_id: (req, file) => {
-            return Date.now() + "-" + file.originalname.replace(".pdf", "");
-        }
-    }
+        public_id: Date.now() + "-" + path.parse(file.originalname).name,
+        format: "pdf"
+    })
 });
-
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
@@ -336,7 +333,10 @@ app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) =
         }
         return res.redirect('/dashboard');
     } catch (error) {
-        console.error('Upload error:', error);
+        console.error("========== UPLOAD ERROR ==========");
+        console.error(error);
+        console.error(error.stack);
+        console.error("==================================");
         // Delete uploaded files if database operation fails
         if (req.files) {
             req.files.forEach(file => {
