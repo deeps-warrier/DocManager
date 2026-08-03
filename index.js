@@ -417,58 +417,49 @@ app.get('/documents/:id', async (req, res) => {
 
 // Delete document
 app.delete('/documents/:id', async (req, res) => {
-    const { id } = req.params;
+
     try {
+
+        const { id } = req.params;
+
         const document = await Doc.findByIdAndDelete(id);
+
+        if (!document) {
+            return res.status(404).json({
+                error: 'Document not found'
+            });
+        }
+
         if (document.files && document.files.length > 0) {
+
             for (const file of document.files) {
 
-            if (file.publicId) {
-        
-                await cloudinary.uploader.destroy(file.publicId, {
-                    resource_type: "raw"
-                });
-        
+                if (file.publicId) {
+
+                    await cloudinary.uploader.destroy(file.publicId, {
+                        resource_type: "raw"
+                    });
+
+                }
+
             }
-        
-        }
-        if (!document) return res.status(404).json({ error: 'Document not found' });
-        res.status(200).json({ message: 'Document deleted successfully' });
-        catch (error) {
-        res.status(500).json({ error: 'Error deleting document' });
-    }
-});
 
-
-app.get('/dashboard', isLoggedIn, async (req, res) => {
-    try {
-        let documents;
-        
-        if (req.session.user.role === 'admin') {
-            documents = await Doc.find()
-                .populate('department')
-                .populate('category')
-                .populate('uploadedBy')
-                .sort({ 'files.0.filename': 1 });
-        } else {
-            documents = await Doc.find({ department: req.user.department })
-                .populate('department')
-                .populate('category')
-                .populate('uploadedBy')
-                .sort({ 'files.0.filename': 1 });
         }
-        
-        res.render('dashboard', {
-            user: req.user,
-            documents: documents,
+
+        res.status(200).json({
+            message: 'Document deleted successfully'
         });
+
     } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        res.status(500).render('error', { 
-            error: 'Error fetching dashboard data',
-            user: req.user
+
+        console.error(error);
+
+        res.status(500).json({
+            error: 'Error deleting document'
         });
+
     }
+
 });
 
 
