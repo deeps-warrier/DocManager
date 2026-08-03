@@ -434,7 +434,7 @@ app.delete('/documents/:id', async (req, res) => {
         }
         if (!document) return res.status(404).json({ error: 'Document not found' });
         res.status(200).json({ message: 'Document deleted successfully' });
-    } catch (error) {
+        catch (error) {
         res.status(500).json({ error: 'Error deleting document' });
     }
 });
