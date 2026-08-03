@@ -312,12 +312,12 @@ app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) =
                 category: category,
                 files: [{
                     originalname: file.originalname,
-                    filename: file.filename,
+                    filename: file.originalname,
                     path: file.path,
                     cloudinaryUrl: file.path,
-                    publicId: file.filename,
+                    publicId: file.filename || file.public_id,
                     uploadDate: new Date()
-                }],
+                }]
                 uploadedBy: req.user._id
             });
 
@@ -338,13 +338,8 @@ app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) =
         console.error(error.stack);
         console.error("==================================");
         // Delete uploaded files if database operation fails
-        if (req.files) {
-            req.files.forEach(file => {
-                fs.unlink(file.path, (err) => {
-                    if (err) console.error('Error deleting file:', err);
-                });
-            });
-        }
+        // Nothing to delete.
+        // Cloudinary handles uploads directly.
         res.status(500).json({ error: 'Error uploading documents' });
     }
 });
@@ -415,14 +410,16 @@ app.delete('/documents/:id', async (req, res) => {
     try {
         const document = await Doc.findByIdAndDelete(id);
         if (document.files && document.files.length > 0) {
-            document.files.forEach(file => {
-            const filePath = path.resolve(__dirname, file.path);
-            if (fs.existsSync(filePath)) {
+            for (const file of document.files) {
+
+            if (file.publicId) {
+        
                 await cloudinary.uploader.destroy(file.publicId, {
                     resource_type: "raw"
-                }); // Delete the file from storage
+                });
+        
             }
-            });
+        
         }
         if (!document) return res.status(404).json({ error: 'Document not found' });
         res.status(200).json({ message: 'Document deleted successfully' });
@@ -549,47 +546,27 @@ app.delete('/departments/:id', isAdmin, async (req, res) => {
 
 // Stream document route (for embed source)
 app.get('/docs/stream/:id', isLoggedIn, async (req, res) => {
+
     try {
+
         const document = await Doc.findById(req.params.id);
-        if (!document || !document.files || document.files.length === 0) {
-            return res.status(404).send('Document not found');
+
+        if (!document || !document.files.length) {
+
+            return res.status(404).send("Document not found");
+
         }
 
-        // Check if user has access to this document
-        // if (req.session.user.role !== 'admin' && 
-        //     document.department.toString() !== req.session.user.department.toString()) {
-        //     return res.status(403).send('Access denied');
-        // }
+        return res.redirect(document.files[0].cloudinaryUrl);
 
-        const file = document.files[0];
+    } catch (err) {
 
-        if (!fs.existsSync(filePath)) {
-            return res.status(404).send('File not found on server');
-        }
+        console.error(err);
 
-        // Set headers for PDF viewing
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline; filename="document.pdf"');
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('X-Content-Type-Options', 'nosniff');
-        res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+        return res.status(500).send("Unable to open document");
 
-        // Stream the file
-        const fileStream = fs.createReadStream(filePath);
-        fileStream.pipe(res);
-
-        // Handle stream errors
-        fileStream.on('error', (error) => {
-            console.error('Stream error:', error);
-            if (!res.headersSent) {
-                res.status(500).send('Error streaming document');
-            }
-        });
-    } catch (error) {
-        console.error('Error streaming document:', error);
-        res.status(500).send('Error streaming document');
     }
+
 });
 
 
