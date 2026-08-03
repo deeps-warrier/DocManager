@@ -587,27 +587,22 @@ app.delete('/departments/:id', isAdmin, async (req, res) => {
 
 // Stream document route (for embed source)
 app.get('/docs/stream/:id', isLoggedIn, async (req, res) => {
-
     try {
 
         const document = await Doc.findById(req.params.id);
 
         if (!document || !document.files.length) {
-
             return res.status(404).send("Document not found");
-
         }
 
-        return res.redirect(document.files[0].cloudinaryUrl);
+        const file = document.files[0];
+
+        return res.redirect(file.cloudinaryUrl);
 
     } catch (err) {
-
         console.error(err);
-
-        return res.status(500).send("Unable to open document");
-
+        res.status(500).send("Error opening document");
     }
-
 });
 
 
