@@ -317,7 +317,7 @@ app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) =
                     cloudinaryUrl: file.path,
                     publicId: file.filename || file.public_id,
                     uploadDate: new Date()
-                }]
+                }],
                 uploadedBy: req.user._id
             });
 
@@ -345,34 +345,45 @@ app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) =
 });
 
 
-app.delete('/users/:id', isAdmin, async (req, res) => {
+app.delete('/documents/:id', async (req, res) => {
     try {
+
         const { id } = req.params;
 
-        // Prevent deleting yourself
-        if (id === req.session.user._id.toString()) {
-            return res.status(400).json({ error: 'Cannot delete your own account' });
+        const document = await Doc.findByIdAndDelete(id);
+
+        if (!document) {
+            return res.status(404).json({ error: "Document not found" });
         }
 
-        const user = await User.findById(id);
-        
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
+        if (document.files && document.files.length > 0) {
 
-        // Prevent deleting the last admin
-        if (user.role === 'admin') {
-            const adminCount = await User.countDocuments({ role: 'admin' });
-            if (adminCount <= 1) {
-                return res.status(400).json({ error: 'Cannot delete the last admin user' });
+            for (const file of document.files) {
+
+                if (file.publicId) {
+
+                    await cloudinary.uploader.destroy(file.publicId, {
+                        resource_type: "raw"
+                    });
+
+                }
+
             }
+
         }
 
-        await User.findByIdAndDelete(id);
-        res.status(200).json({ message: 'User deleted successfully' });
+        res.status(200).json({
+            message: "Document deleted successfully"
+        });
+
     } catch (error) {
-        console.error('Error deleting user:', error);
-        res.status(500).json({ error: 'Error deleting user' });
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Error deleting document"
+        });
+
     }
 });
 
