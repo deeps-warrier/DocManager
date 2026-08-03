@@ -418,7 +418,9 @@ app.delete('/documents/:id', async (req, res) => {
             document.files.forEach(file => {
             const filePath = path.resolve(__dirname, file.path);
             if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath); // Delete the file from storage
+                await cloudinary.uploader.destroy(file.publicId, {
+                    resource_type: "raw"
+                }); // Delete the file from storage
             }
             });
         }
@@ -560,7 +562,6 @@ app.get('/docs/stream/:id', isLoggedIn, async (req, res) => {
         // }
 
         const file = document.files[0];
-        const filePath = path.resolve(__dirname, file.path);
 
         if (!fs.existsSync(filePath)) {
             return res.status(404).send('File not found on server');
