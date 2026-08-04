@@ -340,14 +340,15 @@ app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) =
         }
         return res.redirect('/dashboard');
     } catch (error) {
-        console.error("========== UPLOAD ERROR ==========");
-        console.error(error);
-        console.error(error.stack);
-        console.error("==================================");
-        // Delete uploaded files if database operation fails
-        // Nothing to delete.
-        // Cloudinary handles uploads directly.
-        res.status(500).json({ error: 'Error uploading documents' });
+
+    console.error("========== UPLOAD ERROR ==========");
+    console.error(error);
+    console.error(error.stack);
+    console.error("==================================");
+
+    return res.redirect("/dashboard");
+
+}
     }
 });
 
