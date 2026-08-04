@@ -304,7 +304,7 @@ app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) =
         }
         console.log("====================================");
         console.log("FILES RECEIVED FROM CLOUDINARY:");
-        console.log(req.files);
+        console.dir(req.files, { depth: null });
         console.log("====================================");
 
         const { department, category } = req.body;
