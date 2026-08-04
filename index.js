@@ -302,10 +302,13 @@ app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) =
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ error: 'No files uploaded' });
         }
-        console.log("====================================");
-        console.log("FILES RECEIVED FROM CLOUDINARY:");
+        console.log("======================================");
+        console.log("UPLOAD DEBUG");
+        console.log("======================================");
+        
         console.dir(req.files, { depth: null });
-        console.log("====================================");
+        
+        console.log("======================================");
 
         const { department, category } = req.body;
 
