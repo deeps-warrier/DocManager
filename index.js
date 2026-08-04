@@ -300,6 +300,7 @@ app.get('/users', async (req, res) => {
 app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) => {
     try {
         if (!req.files || req.files.length === 0) {
+            console.log(JSON.stringify(req.files, null, 2));
             return res.status(400).json({ error: 'No files uploaded' });
         }
         console.log("======================================");
