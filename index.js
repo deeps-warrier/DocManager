@@ -9,7 +9,6 @@ const Category = require('./models/Category');
 const Doc = require('./models/Docs');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
-const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 222;
 const MONGO_URI = process.env.MONGO_URI;
@@ -300,17 +299,10 @@ app.get('/users', async (req, res) => {
 app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) => {
     try {
         if (!req.files || req.files.length === 0) {
-            console.log(JSON.stringify(req.files, null, 2));
+            
             return res.status(400).json({ error: 'No files uploaded' });
         }
-        console.log("======================================");
-        console.log("UPLOAD DEBUG");
-        console.log("======================================");
         
-        console.dir(req.files, { depth: null });
-        
-        console.log("======================================");
-
         const { department, category } = req.body;
 
         // Create a database entry for each uploaded file
@@ -323,7 +315,7 @@ app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) =
                     filename: file.filename,
                     path: file.path,
                     cloudinaryUrl: file.path,
-                    publicId: file.filename || file.public_id,
+                    publicId: file.filename,
                     uploadDate: new Date()
                 }],
                 uploadedBy: req.user._id
@@ -342,60 +334,12 @@ app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) =
         return res.redirect('/dashboard');
     } catch (error) {
 
-    console.error("========== UPLOAD ERROR ==========");
     console.error(error);
-    console.error(error.stack);
-    console.error("==================================");
 
-    return res.redirect("/dashboard");
+    return res.status(500).send("Upload Failed");
 
     }
 });
-
-
-app.delete('/documents/:id', async (req, res) => {
-    try {
-
-        const { id } = req.params;
-
-        const document = await Doc.findByIdAndDelete(id);
-
-        if (!document) {
-            return res.status(404).json({ error: "Document not found" });
-        }
-
-        if (document.files && document.files.length > 0) {
-
-            for (const file of document.files) {
-
-                if (file.publicId) {
-
-                    await cloudinary.uploader.destroy(file.publicId, {
-                        resource_type: "raw"
-                    });
-
-                }
-
-            }
-
-        }
-
-        res.status(200).json({
-            message: "Document deleted successfully"
-        });
-
-    } catch (error) {
-
-        console.error(error);
-
-        res.status(500).json({
-            error: "Error deleting document"
-        });
-
-    }
-});
-
-
 
 
 
