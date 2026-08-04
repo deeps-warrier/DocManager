@@ -349,7 +349,6 @@ app.post('/upload', isLoggedIn, upload.array('documents', 5), async (req, res) =
 
     return res.redirect("/dashboard");
 
-}
     }
 });
 
