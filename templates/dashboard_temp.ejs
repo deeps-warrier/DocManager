@@ -65,8 +65,8 @@
   <%= doc.category?.name %>
 </span>
 
-                  <h6 class="card-title" title="<%= doc.files[0]?.originalname %>">
-                    <%= doc.files[0].originalname %>
+                  <h6 class="card-title" title="<%= doc.files[0]?.originalname?.replace(/\.pdf$/i, '') %>">
+                    <%= doc.files[0]?.originalname?.replace(/\.pdf$/i, '') %>
                   </h6>
 
                   <p class="card-text small mb-1" style="color: #1a819c; font-weight: 600">
