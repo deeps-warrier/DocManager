@@ -166,7 +166,262 @@
 
 <!-- Scripts -->
 <script>
-document.getElementById("uploadModal").addEventListener("show.bs.modal", async function () {
+
+// ============================================================
+// LOAD CATEGORIES FOR UPLOAD + CATEGORY FILTERS
+// ============================================================
+
+async function loadCategories() {
+
+  try {
+
+    const response = await fetch("/categories");
+
+    if (!response.ok) {
+      throw new Error("Failed to load categories");
+    }
+
+    const categories = await response.json();
+
+    // --------------------------------------------------------
+    // 1. LOAD CATEGORY FILTER BUTTONS
+    // --------------------------------------------------------
+
+    const categoryFilters = document.getElementById("categoryFilters");
+
+    // Keep All Documents button
+    categoryFilters.innerHTML = `
+      <span
+        class="badge category-filter active"
+        data-category="all"
+        style="
+          cursor:pointer;
+          background-color:#1a819c;
+          font-size:0.9rem;
+          padding:8px 15px;
+        ">
+        All Documents
+      </span>
+    `;
+
+    // Add every category from database
+    categories.forEach((cat) => {
+
+      const categoryButton = document.createElement("span");
+
+      categoryButton.className = "badge category-filter";
+
+      categoryButton.setAttribute("data-category", cat._id);
+
+      categoryButton.style.cursor = "pointer";
+      categoryButton.style.backgroundColor = "#1a819c";
+      categoryButton.style.fontSize = "0.9rem";
+      categoryButton.style.padding = "8px 15px";
+
+      categoryButton.textContent = cat.name;
+
+      categoryFilters.appendChild(categoryButton);
+
+    });
+
+
+    // --------------------------------------------------------
+    // 2. CATEGORY FILTER CLICK
+    // --------------------------------------------------------
+
+    document.querySelectorAll(".category-filter").forEach((button) => {
+
+      button.addEventListener("click", function () {
+
+        const selectedCategory = this.getAttribute("data-category");
+
+        // Remove active from all buttons
+        document.querySelectorAll(".category-filter").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+
+        // Make clicked button active
+        this.classList.add("active");
+
+        // Get all document cards
+        const documents = document.querySelectorAll(
+          ".row.row-cols-1.row-cols-md-3.row-cols-lg-4.g-5 > .col"
+        );
+
+        documents.forEach((doc) => {
+
+          const documentCategory = doc.getAttribute("data-category");
+
+          if (
+            selectedCategory === "all" ||
+            documentCategory === selectedCategory
+          ) {
+
+            doc.style.display = "";
+
+          } else {
+
+            doc.style.display = "none";
+
+          }
+
+        });
+
+      });
+
+    });
+
+  } catch (error) {
+
+    console.error("Error loading categories:", error);
+
+  }
+
+}
+
+
+// ============================================================
+// UPLOAD MODAL
+// ============================================================
+
+document.getElementById("uploadModal").addEventListener(
+  "show.bs.modal",
+  async function () {
+
+    try {
+
+      // ------------------------------------------------------
+      // LOAD DEPARTMENTS
+      // ------------------------------------------------------
+
+      const response = await fetch("/departments");
+
+      const departments = await response.json();
+
+      const departmentSelect =
+        document.getElementById("department");
+
+      departmentSelect.innerHTML =
+        '<option value="">Select Department</option>';
+
+      departments.forEach((dept) => {
+
+        const option = document.createElement("option");
+
+        option.value = dept._id;
+
+        option.textContent = dept.name;
+
+        departmentSelect.appendChild(option);
+
+      });
+
+
+      // Select user's department automatically
+      const userDepartment = "<%= user.department %>";
+
+      if (userDepartment) {
+
+        departmentSelect.value = userDepartment;
+
+      }
+
+
+      // ------------------------------------------------------
+      // LOAD CATEGORIES IN UPLOAD DROPDOWN
+      // ------------------------------------------------------
+
+      const catresponse = await fetch("/categories");
+
+      const categories = await catresponse.json();
+
+      const CategorySelect =
+        document.getElementById("category");
+
+      CategorySelect.innerHTML =
+        '<option value="">Select Category</option>';
+
+      categories.forEach((cat) => {
+
+        const option = document.createElement("option");
+
+        option.value = cat._id;
+
+        option.textContent = cat.name;
+
+        CategorySelect.appendChild(option);
+
+      });
+
+    } catch (error) {
+
+      console.error("Error fetching details:", error);
+
+      alert("Error loading details. Please try again.");
+
+    }
+
+  }
+);
+
+
+// ============================================================
+// DELETE DOCUMENT
+// ============================================================
+
+async function deleteDocument(docId) {
+
+  if (!confirm("Are you sure you want to delete this document?")) {
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      `/documents/${docId}`,
+      {
+        method: "DELETE"
+      }
+    );
+
+    if (response.ok) {
+
+      window.location.reload();
+
+    } else {
+
+      const data = await response.json();
+
+      alert(
+        data.error ||
+        "Error deleting document"
+      );
+
+    }
+
+  } catch (error) {
+
+    console.error("Error:", error);
+
+    alert("Error deleting document");
+
+  }
+
+}
+
+
+// ============================================================
+// INITIAL LOAD
+// ============================================================
+
+// Load category buttons immediately when Dashboard opens
+document.addEventListener("DOMContentLoaded", function () {
+
+  loadCategories();
+
+});
+
+</script>
 
   try {
 
