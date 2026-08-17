@@ -24,15 +24,47 @@
 </style>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Disable right click
-    document.addEventListener("contextmenu", (e) => e.preventDefault());
+document.addEventListener("DOMContentLoaded", function () {
 
-    // Disable keyboard shortcuts
-    document.addEventListener("keydown", (e) => {
-      if ((e.ctrlKey && (e.key === "s" || e.key === "p")) || (e.ctrlKey && e.shiftKey && e.key === "i") || e.key === "F12" || (e.ctrlKey && e.key === "c")) {
+    // Disable right click
+    document.addEventListener("contextmenu", function (e) {
         e.preventDefault();
-      }
     });
-  });
+
+    // Disable common save / print / developer shortcuts
+    document.addEventListener("keydown", function (e) {
+
+        // Ctrl + S
+        if (e.ctrlKey && e.key.toLowerCase() === "s") {
+            e.preventDefault();
+        }
+
+        // Ctrl + P
+        if (e.ctrlKey && e.key.toLowerCase() === "p") {
+            e.preventDefault();
+        }
+
+        // Ctrl + Shift + I
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "i") {
+            e.preventDefault();
+        }
+
+        // Ctrl + Shift + J
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "j") {
+            e.preventDefault();
+        }
+
+        // Ctrl + U
+        if (e.ctrlKey && e.key.toLowerCase() === "u") {
+            e.preventDefault();
+        }
+
+        // F12
+        if (e.key === "F12") {
+            e.preventDefault();
+        }
+
+    });
+
+});
 </script>
