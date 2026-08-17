@@ -318,7 +318,7 @@ document.getElementById("uploadModal").addEventListener(
 
 
       // Select user's department automatically
-      const userDepartment = "<%= user.department %>";
+      const userDepartment = "<%= user.department?._id || '' %>";
 
       if (userDepartment) {
 
