@@ -422,69 +422,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 </script>
-
-  try {
-
-    const response = await fetch("/departments");
-    const departments = await response.json();
-    const departmentSelect = document.getElementById("department");
-
-    departmentSelect.innerHTML = '<option value="">Select Department</option>';
-
-    departments.forEach((dept) => {
-      const option = document.createElement("option");
-      option.value = dept._id;
-      option.textContent = dept.name;
-      departmentSelect.appendChild(option);
-    });
-
-    const userDepartment = "<%= user.department %>";
-    if (userDepartment) {
-      departmentSelect.value = userDepartment;
-    }
-
-    const catresponse = await fetch("/categories");
-    const categories = await catresponse.json();
-
-    const CategorySelect = document.getElementById("category");
-    CategorySelect.innerHTML = '<option value="">Select Category</option>';
-
-    categories.forEach((cat) => {
-      const option = document.createElement("option");
-      option.value = cat._id;
-      option.textContent = cat.name;
-      CategorySelect.appendChild(option);
-    });
-
-  } catch (error) {
-    console.error("Error fetching details:", error);
-    alert("Error loading details. Please try again.");
-  }
-});
-
-async function deleteDocument(docId) {
-
-  if (!confirm("Are you sure you want to delete this document?")) return;
-
-  try {
-
-    const response = await fetch(`/documents/${docId}`, { method: "DELETE" });
-
-    if (response.ok) {
-      window.location.reload();
-    } else {
-      const data = await response.json();
-      alert(data.error || "Error deleting document");
-    }
-
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Error deleting document");
-  }
-
-}
-</script>
-
+ 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"/>
 
 <style>
